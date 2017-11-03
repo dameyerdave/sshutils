@@ -1,0 +1,50 @@
+#!/bin/bash
+
+function usage {
+	echo "USAG: $(basename $0) [-h host] [-u user] [-p port] [-f]"
+	exit 1
+}
+
+USER="$(whoami)"
+HOST=''
+PORT=22
+FORCE=0
+
+while [[ $# -gt 0 ]]
+do
+	key="$1"
+
+	case $key in
+   	-h)
+   	 	HOST="$2"
+   	 	shift 2
+   	 	;;
+   	-u)
+   	 	USER="$2"
+   	 	shift 2
+   	 	;;
+   	-p)
+   	 	PORT="$2"
+   	 	shift 2
+   	 	;;
+   	-f)
+   	 	FORCE=1	
+   	 	shift
+   	 	;;
+   	 *)
+   		usage
+   	 	;;
+	esac
+done
+
+KEY=~/.ssh/${USER}
+
+if [ ! -f ${KEY} -o ${FORCE} -eq 1 ]; then
+	echo "Generating your ssh key..."
+	ssh-keygen -q -C "${USER}s key" -N '' -b 4096 -f ${KEY}
+fi
+
+if [ "${HOST}" != "" ]; then
+	echo "Copy ID to ${USER}@${HOST}:${PORT}"
+	ssh-copy-id -i $KEY ${USER}@${HOST} -p ${PORT}
+fi
