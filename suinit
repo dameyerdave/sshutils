@@ -65,10 +65,14 @@ else
 	echo "Your ssh key exists."
 fi
 
-if [ "${OWNKEY}" != "" -a -f ${OWNKEY} ]; then
-	echo "Copy ID to ${USER}@${HOST}:${PORT} using key ${OWNKEY}"
-	scp -i ${OWNKEY} -P ${PORT} ${KEY}.pub ${USER}@${HOST}:.ssh
-	ssh -i ${OWNKEY} ${USER}@${HOST} -p ${PORT} 'cat .ssh/${USER}.pub >> .ssh/authorized_keys'
+if [ "${OWNKEY}" != "" ]; then
+	if [ -f ${OWNKEY} ]; then
+		echo "Copy ID to ${USER}@${HOST}:${PORT} using key ${OWNKEY}"
+		scp -i ${OWNKEY} -P ${PORT} ${KEY}.pub ${USER}@${HOST}:.ssh
+		ssh -i ${OWNKEY} ${USER}@${HOST} -p ${PORT} 'cat .ssh/${USER}.pub >> .ssh/authorized_keys'
+	else 
+		echo "Key ${OWNKEY} does not exist!"
+	fi
 elif [ "${HOST}" != "" -a -f ${KEY} ]; then
 	echo "Copy ID to ${USER}@${HOST}:${PORT}"
 	ssh-copy-id -i $KEY ${USER}@${HOST} -p ${PORT}
