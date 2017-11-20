@@ -95,7 +95,7 @@ start)
 					exit 1
 				fi
 				if ! ssh -i ${KEYFILE} ${USER}@${HOST} "ps -ef | grep 'tcptunnel --local-port=${RPORT}' | grep -v grep" 2>&1 >/dev/null; then
-					if ! ssh -i ${KEYFILE} ${USER}@${HOST} 'test -x "$(command -v tcptunnel)"' then
+					if ! ssh -i ${KEYFILE} ${USER}@${HOST} 'test -x "$(command -v tcptunnel)"'; then
 						echo "Cannot start tcptunnel because its not installed on the remote host!"
 						exit 1
 					fi
