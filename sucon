@@ -2,6 +2,9 @@
 
 function usage {
 	echo "USAGE: $(basename $0) host [-u user] [-p port] [-k key]"
+	echo "    -u user: the user to authenticate at the destination host (default: whoami)"
+	echo "    -p port: the ssh port at the destination host (default: 22)"
+	echo "    -k key:  the key to authenticate at the destination host (default: ~/.ssh/<user>)"
 	exit 1
 }
 

@@ -2,6 +2,10 @@
 
 function usage {
 	echo "USAGE: $(basename $0) file host [-d dir] [-u user] [-p port] [-k key]"
+	echo "    -d dir: the directory to copy the file to  at the destination host"
+	echo "    -u user: the user to authenticate at the destination host"
+	echo "    -p port: the ssh port at the destination host"
+	echo "    -k key: the key to authenticate at the destination host"
 	exit 1
 }
 

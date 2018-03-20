@@ -1,8 +1,19 @@
 #!/bin/bash
+# require daemon
+# require tcptunnel on remotehost
 
 function usage {
 	echo "USAGE: $(basename $0) start|stop|status -h host -l localport -r remoteport [-u user] [-n name] [-k key] [-t]"
-	echo "  -t: open tcptunnel on remote host"
+	echo ""
+	echo "  <connection name>:  <localhost>:<localport> o==o <user>@<remotehost>:<remoteport> o== <tcptunnel>:<remoteport>  "
+	echo ""
+	echo "    -h host:       the destination host to connect to"
+	echo "    -l localport:  the port on the local host to use for the ssh tunnel"
+	echo "    -r remoteport: the remote port to use for the ssh tunnel"
+	echo "    -u user:       the user to authenticate at the destination host"
+	echo "    -n name:       the name of the ssh tunnel"
+	echo "    -k key:        the key to authenticate at the destination host"
+	echo "    -t:            open tcptunnel on remote host"
 	exit 1	
 }
 
@@ -66,6 +77,7 @@ fi
 
 if [ ! -f $KEYFILE -a "${ACTION}" == "start" ]; then
 	echo "Keyfile ${KEYFILE} does not exist!"
+	echo "\tUse suinit to create one."
 	exit 1
 fi
 
@@ -74,8 +86,8 @@ if [ "${OWNNAME}" == "" -a "${ACTION}" != "status" ]; then
 		NAME="${LPORT}_${HOST}_${RPORT}"
 	else
 		echo "Some parameters are missing!"
-        echo "Give at least -h host -l localport -r remoteport OR -n name"
-        exit 1
+        	echo "Give at least -h host -l localport -r remoteport OR -n name"
+        	exit 1
 	fi
 else
 	NAME="${OWNNAME}"

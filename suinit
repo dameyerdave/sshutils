@@ -1,7 +1,14 @@
 #!/bin/bash
+# needs putty-tools
 
 function usage {
-	echo "USAG: $(basename $0) [-h host] [-u user] [-p port] [-k key] [-f]"
+	echo "USAG: $(basename $0) [-h host] [-u user] [-p port] [-k key] [-f] [-y]"
+	echo "    -h host: the destination host to copy the id to"
+	echo "    -u user: the user at the destination host (default: whoami)"
+	echo "    -p port: the ssh port at the destination host (default: 22)"
+	echo "    -k key:  the ssh key to authenticate at the destination host (default: password authentication)"
+	echo "    -f:      force the generation of the ssh key even it already exists"
+	echo "    -y:      Also create a putty key *.ppk"
 	exit 1
 }
 
@@ -10,6 +17,7 @@ HOST=''
 PORT=22
 OWNKEY=''
 FORCE=0
+PUTTY=0
 
 while [[ $# -gt 0 ]]
 do
@@ -34,6 +42,10 @@ do
    	 	;;
    	-f)
    	 	FORCE=1	
+   	 	shift
+   	 	;;
+   	-y)
+   	 	PUTTY=1	
    	 	shift
    	 	;;
    	 *)
@@ -61,6 +73,10 @@ fi
 if [ ! -f ${KEY} -o ${FORCE} -eq 1 ]; then
 	echo "Generating your ssh key..."
 	ssh-keygen -q -C "${USER}s key" -N '' -b 4096 -f ${KEY}
+	if [ ${PUTTY} -eq 1 ]; then
+		echo "Generating your putty key..."
+		puttygen ${KEY} -o ${KEY}.ppk
+	fi
 else
 	echo "Your ssh key exists."
 fi
