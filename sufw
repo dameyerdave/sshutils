@@ -17,6 +17,17 @@ function usage {
 	exit 1	
 }
 
+function parse_daemon {
+	local line="$1"
+	NAME=$(echo $line | sed -E 's,.*-n ([^ ]+) .*,\1,')
+        USER=$(echo $line | sed -E 's,.* ([^@]+)@.*,\1,')
+        HOST=$(echo $line | sed -E 's,.*@([^ ]+) .*,\1,')
+        KEY=$(echo $line | sed -E 's,.*-i ([^ ]+) .*,\1,')
+        LPORT=$(echo $line | sed -E 's,.*-R [^:]+:[^:]+:([^ ]+).*,\1,')
+        RPORT=$(echo $line | sed -E 's,.*-R ([^:]+):.*,\1,')
+	echo "${NAME}#${USER}#${HOST}#${KEY}#${LPORT}#${RPORT}"
+}
+
 USER="$(whoami)"
 ACTION="$1"
 OWNNAME=''
@@ -132,6 +143,17 @@ start)
 	;;
 stop)
 	if daemon --running -n "${NAME}"; then
+		DAEMON=$(ps -ef | grep "daemon -n ${NAME}" | grep -v grep)
+		SPEC=$(parse_daemon "${DAEMON}")
+		KEYFILE=$(echo "$SPEC" | cut -d'#' -f4)
+		USER=$(echo "$SPEC" | cut -d'#' -f2)
+		HOST=$(echo "$SPEC" | cut -d'#' -f3)
+		RPORT=$(echo "$SPEC" | cut -d'#' -f6)
+		if ssh -i ${KEYFILE} ${USER}@${HOST} "ps -ef | grep 'tcptunnel --local-port=${RPORT}' | grep -v grep" 2>&1 >/dev/null; then
+			TCPTUNPID=$(ssh -i ${KEYFILE} ${USER}@${HOST} "ps -ef | grep 'tcptunnel --local-port=${RPORT}' | grep -v grep | awk '{print \$2}'")
+			ssh -i ${KEYFILE} ${USER}@${HOST} "kill -9 ${TCPTUNPID}"		
+			echo "Stoped tcptunnel on remote host"
+		fi
 		daemon --stop -n "${NAME}"
 		until ! daemon --running -n "${NAME}"; do
 			sleep 1
@@ -143,7 +165,10 @@ stop)
 	fi
 	;;
 status)
-	ps -ef | grep "daemon -n" | grep -v grep | while read line; do echo $line | cut -d' ' -f 10; done
+	ps -ef | grep "daemon -n" | grep -v grep | while read line 
+	do 
+		echo $(parse_daemon "$line" | cut -d'#' -f1)
+	done
 	;;		
 *)
 	usage
