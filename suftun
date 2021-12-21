@@ -9,5 +9,4 @@ CONN="$1"
 RPORT="$2"
 LPORT="$3"
 
-
-ssh -4 -N -T -R ${RPORT}:localhost:${LPORT} ${CONN}
+ssh -4 -N -T -L ${LPORT}:localhost:${RPORT} ${CONN}
